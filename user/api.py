@@ -2,6 +2,7 @@ from lib.http import render_json
 from common import error
 from user.logic import send_verify_code, check_vcode
 from user.models import User
+from user.forms import ProfileForm
 
 
 def get_verify_code(request):
@@ -33,7 +34,14 @@ def get_profile(request):
 
 def modify_profile(request):
     '''修改个人资料'''
-    pass
+    form = ProfileForm(request.POST)
+    if form.is_valid():
+        user = request.user
+        user.profile.__dict__.update(form.cleaned_data)
+        user.profile.save()
+        return render_json(None)
+    else:
+        return render_json(form.errors, error.PROFILE_ERROR)
 
 
 def upload_avatar(request):
