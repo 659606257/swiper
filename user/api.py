@@ -1,6 +1,6 @@
 from lib.http import render_json
 from common import error
-from user.logic import send_verify_code, check_vcode
+from user.logic import send_verify_code, check_vcode, save_upload_file
 from user.models import User
 from user.forms import ProfileForm
 
@@ -46,4 +46,9 @@ def modify_profile(request):
 
 def upload_avatar(request):
     '''头像上传'''
-    pass
+    file = request.FILES.get('avatar')
+    if file:
+        save_upload_file(request.user, file)
+        return render_json(None)
+    else:
+        return render_json(None, error.FILE_NOT_FOUND)
