@@ -1,6 +1,8 @@
 import datetime
 
 from user.models import User
+from social.models import Swiped
+from social.models import Friend
 
 
 def get_rcmd_users(user):
@@ -25,3 +27,11 @@ def get_rcmd_users(user):
                                 birth_year__lte=min_year)
 
     return users
+
+
+def like(user, sid):
+    '''喜欢一个用户'''
+    Swiped.mark(user.id, sid, 'like')
+    # 检查被滑动的用户是否喜欢过自己
+    if Swiped.is_liked(sid, user.id):
+        Friend.be_friends(user.id, sid)

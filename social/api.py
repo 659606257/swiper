@@ -16,6 +16,7 @@ def get_users(request):
 
 def like(request):
     '''喜欢'''
+    sid = request.POST.get('sid')
     return render_json()
 
 
