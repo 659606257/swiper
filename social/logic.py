@@ -35,3 +35,35 @@ def like(user, sid):
     # 检查被滑动的用户是否喜欢过自己
     if Swiped.is_liked(sid, user.id):
         Friend.be_friends(user.id, sid)
+        return True
+    else:
+        return False
+
+
+def superlike(user, sid):
+    '''超级喜欢一个用户'''
+    Swiped.mark(user.id, sid, 'superlike')
+
+    # 检查被滑动的用户是否喜欢过自己
+    if Swiped.is_liked(sid, user.id):
+        Friend.be_friends(user.id, sid)
+        return True
+    else:
+        return False
+
+
+def dislike(user, sid):
+    '''不喜欢'''
+    Swiped.mark(user.id, sid, 'dislike')
+
+
+def rewind(user, sid):
+    '''反悔'''
+    try:
+        # 取消滑动记录
+        Swiped.objects.get(uid=user.id, sid=sid).delete()
+    except Swiped.DoesNotExist:
+        pass
+
+    # 撤销好友关系
+    Friend.break_off(user.id, sid)
