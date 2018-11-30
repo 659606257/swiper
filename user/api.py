@@ -1,3 +1,5 @@
+from django.core.cache import cache
+
 from lib.http import render_json
 from common import error
 from user.logic import send_verify_code, check_vcode, save_upload_file
@@ -29,7 +31,15 @@ def login(request):
 def get_profile(request):
     '''获取个人资料'''
     user = request.user
-    return render_json(user.profile.to_dict())
+    key = 'Profile-%s' % user.id
+    user_profile = cache.get(key)
+    print('从缓存获取: %s' % user_profile)
+    if not user_profile:
+        user_profile = user.profile.to_dict()
+        print('从数据库获取: %s' % user_profile)
+        cache.set(key, user_profile)
+        print('将数据添加到缓存')
+    return render_json(user_profile)
 
 
 def modify_profile(request):
@@ -39,6 +49,10 @@ def modify_profile(request):
         user = request.user
         user.profile.__dict__.update(form.cleaned_data)
         user.profile.save()
+
+        # 修改缓存
+        key = 'Profile-%s' % user.id
+        cache.set(key, user.profile.to_dict())
         return render_json(None)
     else:
         return render_json(form.errors, error.PROFILE_ERROR)
